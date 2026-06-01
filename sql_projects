@@ -1,0 +1,267 @@
+Project - Retail Store Management System
+Welcome to the Retail Store Management System 🛒
+This hands-on project will help you apply everything you've learned in the Learn SQL course to build and manage a real-world database for a retail business.
+
+Imagine you are a database administrator for a local retail store. Your job is to design, create, and manage a database that stores information about products, customers, and orders. You will use SQL queries to handle tasks like:
+✅ Creating and modifying tables
+✅ Adding, updating, and deleting records
+✅ Filtering and sorting data for better insights
+✅ Using aggregations to analyze store performance
+✅ Working with dates to track sales trends
+
+CREATE TABLE Products (
+    product_id number PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT CHECK (category IN ('Electronics','Clothing','Grocery','Furniture')),
+    price real NOT NULL CHECK (price > 0),
+    stock_quantity number CHECK (stock_quantity >= 0)
+);
+
+CREATE TABLE Customers (
+    customer_id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT UNIQUE NOT NULL,
+    address TEXT DEFAULT 'Not Provided'
+);
+
+CREATE TABLE Orders (
+    order_id INTEGER PRIMARY KEY,
+    customer_id INTEGER NOT NULL,
+    order_date DATE DEFAULT CURRENT_DATE,
+    total_amount REAL CHECK (total_amount > 0),
+    Remarks_if_any TEXT DEFAULT 'No Remarks'
+);
+INSERT INTO Customers (customer_id, name, email, phone, address) 
+VALUES
+(1, 'John Doe', 'john.doe@email.com', '9876543210', '123 Main St'),
+(2, 'Jane Smith', 'jane.smith@email.com', '9823456789', '45 Elm St'),
+(3, 'Alice Brown', 'alice.b@email.com', '9988776655', '78 Pine Ave'),
+(4, 'Bob Johnson', 'bob.j@email.com', '9765432109', '90 Oak Lane'),
+(5, 'Charlie Lee', 'charlie.l@email.com', '9234567890', 'Not Provided'),
+(6, 'David White', 'david.w@email.com', '9678991234', '12 Maple St'),
+(7, 'Emily Clark', 'emily.c@email.com', '9345678901', 'Not Provided'),
+(8, 'Frank Harris', 'frank.h@email.com', '9763214785', '56 Birch Road'),
+(9, 'Grace Kelly', 'grace.k@email.com', '9456123870', '32 Cedar Ave'),
+(10, 'Henry Adams', 'henry.a@email.com', '9312465789', '22 Walnut Lane');
+
+INSERT INTO Products (product_id, name, category, price, stock_quantity) 
+VALUES
+(101, 'Apple iPhone 15', 'Electronics', 999.99, 10),
+(102, 'Samsung Galaxy S23', 'Electronics', 899.99, 15),
+(103, 'Leather Jacket', 'Clothing', 149.99, 25),
+(104, 'HP Laptop', 'Electronics', 799.99, 8),
+(105, 'Wooden Dining Table', 'Furniture', 499.99, 5),
+(106, 'Nike Running Shoes', 'Clothing', 129.99, 20),
+(107, 'LED TV 55"', 'Electronics', 699.99, 12),
+(108, 'Rice 10kg', 'Grocery', 25.99, 50),
+(109, 'Sofa Set (3+1+1)', 'Furniture', 999.99, 4),
+(110, 'Organic Honey 500ml', 'Grocery', 15.99, 30);
+
+INSERT INTO Orders (order_id, customer_id, order_date, total_amount, Remarks_if_any) 
+VALUES
+(1001, 1, '2024-01-15', 999.99, 'No Remarks'),
+(1002, 2, '2024-01-16', 299.98, 'Delivered'),
+(1003, 3, '2024-01-17', 129.99, 'Payment Pending'),
+(1004, 4, '2024-01-18', 899.99, 'No Remarks'),
+(1005, 5, '2024-01-19', 799.99, 'Cancelled'),
+(1006, 6, '2024-01-20', 499.99, 'Delivered'),
+(1007, 7, '2024-01-21', 129.99, 'No Remarks'),
+(1008, 8, '2024-01-22', 699.99, 'Refund Issued'),
+(1009, 9, '2024-01-23', 25.99, 'No Remarks'),
+(1010, 10, '2024-01-24', 15.99, 'Delivered');
+
+--Queries for retrieving the first 3 records from the three tables
+select *from Customers
+where customer_id <= 3;
+select *from Products
+where product_id <=103;
+select *from Orders
+where order_id <= 1003;
+  
+/* Fetch all distinct product categories. */
+select DISTINCT category from Products;
+  
+/* Get orders of customers who have spent more than ₹900. */
+select *from Orders
+where total_amount >900;
+  
+/* Find the 2 most expensive products from the Products table. */
+select *from Products
+order by price DESC
+limit 2;
+  
+/* Find customers who have not provided their address. */
+select *from Customers
+where address='Not Provided';
+  
+/* Increase the prices of all products in the 'Electronics' category by 10%.
+Then, retrieve the name, price, and stock quantity of the first Electronics product from the Products table. */
+update Products set price = price*1.1
+where category='Electronics';
+select name,price,stock_quantity from Products
+where category='Electronics'
+order by product_id
+LIMIT 1;
+  
+/* Add a new column "discount" to the Orders table.
+Set its default value to 0.
+Then, retrieve the order_id, total_amount and discount of the first order from the Orders table. */
+alter table Orders
+add column discount default 0.0;
+select order_id,total_amount,discount from Orders
+order by order_id
+LIMIT 1;
+  
+/* Update the stock quantity of all products that has stock quantity of 10 to 0.
+Then, retrieve all the details of all the products whose stock quantity is 0 from the Products table. */
+Update Products
+set stock_quantity = 0
+where stock_quantity =10;
+select *from Products
+where stock_quantity = 0;
+
+/* Add a new column called "new_address" to the Customers table.
+Set its default value to "Unknown".
+Then, retrieve the name, address and new_address of the first customer from the Customers table. */
+alter table Customers
+add column new_address default 'Unknown';
+select name,address,new_address from Customers
+order by customer_id
+limit 1;
+
+/* Add a new column "discount" to the Orders table.
+Set its default value to 0.
+Set a 5% discount for all orders above ₹900.
+Then, retrieve the order_id, total_amount, discount of all orders that has at least some discount from the Orders table. */
+alter table Orders
+add column discount default 0;
+update Orders
+set discount = total_amount*0.05
+where total_amount >900;
+select order_id,total_amount,discount from Orders
+order by discount desc
+limit 1;
+
+/* Remove all products that are out of stock.
+Then, retrieve the product_id, name and stock_quantity of all products from the Product table. */
+BEGIN TRANSACTION;
+SAVEPOINT S1;
+--Savepoint created incase any changes to the the database beyond this point has to be undone in the future.
+/* Update your query below this line*/
+delete from Products
+where stock_quantity = 0;
+select product_id,name,stock_quantity from Products;
+
+/* Delete all orders that were placed before 2024-01-20.
+Then, retrieve the order_id, customer_id, order_date, total_amount of all orders from the Orders table */
+BEGIN TRANSACTION;
+SAVEPOINT S1;
+--Savepoint created incase any changes to the the database beyond this point has to be undone in the future.
+/* Update your query here*/
+delete from Orders
+where order_date < '2024-01-20';
+select order_id,customer_id,order_date,total_amount from Orders;
+
+/* We have deleted all orders that were placed before 2024-01-20.
+You need to do the following
+Delete all Customers from the Customer table who have no records in the Orders table.
+Then, retrieve the customer_id and name of all Customers from the Customers table. */
+BEGIN TRANSACTION;
+SAVEPOINT S1;
+--Savepoint created incase any changes to the the database beyond this point has to be undone in the future.
+DELETE FROM Orders
+WHERE order_date < '2024-01-20';
+/* Update your query here */
+delete from Customers
+where customer_id not in (
+select customer_id from Orders
+);
+select customer_id,name from Customers;
+
+/* Delete all orders from the Orders table that are less than Rs. 150.
+Then, retrieve the order_id, customer_id and total_amount of all orders from the Orders table. */
+BEGIN TRANSACTION;
+SAVEPOINT S1;
+--Savepoint created incase any changes to the the database beyond this point has to be undone in the future.
+/* Update your query below this line*/
+delete from Orders
+where total_amount < 150;
+select order_id,customer_id,total_amount from Orders;
+
+/* Find the total revenue generated and display it with the header total_revenue. */
+ROLLBACK TO S1;
+/* Update your query below this line*/
+select sum(total_amount) as total_revenue from Orders;
+
+/* Find the average spending per customer and display it with the header avg_spending_per_customer. */
+select avg(total_amount) as avg_spending_per_customer from Orders;
+
+/* Find the number of orders placed per month and display them with the headers order_month and total_orders.
+To aggregate orders placed per month - you can use the following */
+ROLLBACK TO S1;
+/* Update your query below this line*/
+select strftime('%Y-%m',order_date) as order_month,
+count(order_id) as total_orders from Orders
+group by strftime('%Y-%m',order_date)
+order by order_month;
+
+/* Find the highest-priced product along with its name */
+ROLLBACK TO S1;
+/* Update your query below this line*/
+select name,price from Products
+order by price desc
+limit 1;
+
+/* Update the Customers table to replace all occurrences of "Unknown" in the new_address column with NULL.
+Ensure that no records are deleted, only modified.
+Then, retrieve the customer_id, name and new_address of the first 3 customers from the Customer table. */
+update Customers
+set new_address = NULL 
+where new_address='Unknown';
+select customer_id,name,new_address from Customers
+limit 3;
+
+/* Check if the customer with customer_id = 10 and name = 'Henry Adams' has NULL in the new_address column.
+If it is NULL, update it to "23 Walnut Lane".
+Then, retrieve all details about that customer from the Customers table. */
+update Customers
+set new_address = '23 Walnut Lane'
+where customer_id = 10
+and name = 'Henry Adams'
+and new_address = 'Unknown';
+select *from Customers
+where customer_id = 10 and name = 'Henry Adams';
+
+/* Update the Orders table by setting the Remarks_if_any field to NULL wherever it currently has the value "No Remarks".
+After the update, retrieve the order_id and Remarks_if_any for all orders where Remarks_if_any is NULL. */
+Update Orders
+set Remarks_if_any = NULL
+where Remarks_if_any = 'No Remarks';
+select order_id,Remarks_if_any from Orders
+where Remarks_if_any is null;
+
+/* Find the order_id, customer_id, and order_date of all orders placed in January 2024.*/
+select order_id,customer_id,order_date from Orders
+where order_date between '2024-01-01' and '2024-01-31';
+
+/* Find the most recent order date and display it with the header 'most_recent_order'. */
+select max(order_date) as most_recent_order from Orders;
+
+/* Count the number of orders placed each day between 2024-01-15 and 2024-01-17. Display them with the 
+  headers 'order_date' and 'order_count'. */
+select order_date,count(order_id) as order_count from Orders
+where order_date between '2024-01-15' and '2024-01-17'
+group by order_date
+order by order_date;
+
+/* Find the number of days between the earliest and latest order dates in the Orders table and display it
+  with the header 'days_between'.  */
+select julianday(max(order_date)) - julianday(min(order_date)) as days_between from Orders;
+
+/* Retrieve the order_id, customer_id, order_date, and total_amount of all orders that were placed in the 5 days 
+  before 2024-01-24 (i.e., from 2024-01-19 to 2024-01-23) */
+select order_id,customer_id,order_date,total_amount from Orders
+where date(order_date) BETWEEN date('2024-01-24','-5 day')
+and date('2024-01-24','-1 day')
+order by order_date;
